@@ -113,7 +113,5 @@ namespace DocxParser
             }
             return textBuilder.ToString();
         }
-
-        public static IEnumerable<string> filePaths { get; set; }
     }
 }
