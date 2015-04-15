@@ -62,7 +62,9 @@ namespace DocxParser
         {
             StringCollection sc = new StringCollection();
 
-            string[] files = Directory.GetFiles(folderPath);
+            // string[] files = Directory.GetFiles(folderPath);
+            var files = Directory.GetFiles(folderPath, "*.docx", SearchOption.AllDirectories);
+     
             foreach (string fileName in files)
             {
                 sc.Add(fileName);
