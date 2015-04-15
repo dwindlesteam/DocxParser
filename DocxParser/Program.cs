@@ -80,7 +80,6 @@ namespace DocxParser
             const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             StringBuilder textBuilder = new StringBuilder();
 
-            // NOTE: Add try catch logic
             using (WordprocessingDocument wdDoc = WordprocessingDocument.Open(Path, false))
             {
                 NameTable nt = new NameTable();
