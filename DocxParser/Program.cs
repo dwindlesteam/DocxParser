@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -11,11 +12,17 @@ namespace DocxParser
 {
     class Program
     {
+        static int numberOfApprovals = 0;
+        static int numberOfNonApprovals = 0;
+
         static void Main(string[] args)
         {
             StringCollection filePaths = new StringCollection();
-            Console.WriteLine("Enter in the path to your Docx Folder. Make sure to escape with '\\'.");
+            IList<string> info = new List<string>();
+            Console.WriteLine("Enter in the path to your Docx Folder. Make sure to escape with '\\\'.");
             string folderPath = Console.ReadLine();
+            Console.WriteLine("Enter in the path to your text file. Make sure to escape with '\\\'.");
+            string textFilePath = Console.ReadLine();
 
             try
             {
@@ -35,11 +42,15 @@ namespace DocxParser
 
             else
             {
+                Console.WriteLine("Processing...");
                 foreach (string filePath in filePaths)
                 {
                     try
                     {
-                        Console.WriteLine(GetReportAndApproverInfo(filePath));
+                        var reportAndApproverInfo = GetReportAndApproverInfo(filePath);
+
+                        info.Add(reportAndApproverInfo);
+                        
                     }
                     catch (Exception e)
                     {
@@ -47,6 +58,11 @@ namespace DocxParser
                     }
 
                 }
+                System.IO.File.WriteAllLines(textFilePath, info);
+
+                Console.WriteLine("{0} files written to {1}", (numberOfNonApprovals + numberOfApprovals).ToString(), textFilePath);
+                Console.WriteLine("# of Approvals: {0}", numberOfApprovals.ToString());
+                Console.WriteLine("# of NonApprovals: {0}", numberOfNonApprovals.ToString());
                 Console.WriteLine("Done.");
                 Console.ReadLine();
             }
@@ -117,12 +133,15 @@ namespace DocxParser
                     textBuilder.Append(approver.InnerText);
                     textBuilder.Append(approver.NextSibling.InnerText);
                     textBuilder.Append(Environment.NewLine);
+                    numberOfApprovals++;
+                    
                 }
 
                 else
                 {
                     textBuilder.Append("No Approver");
                     textBuilder.Append(Environment.NewLine);
+                    numberOfNonApprovals++;
                 }
 
                 wdDoc.Close();
