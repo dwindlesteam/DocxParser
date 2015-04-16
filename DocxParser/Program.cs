@@ -19,9 +19,9 @@ namespace DocxParser
         {
             StringCollection filePaths = new StringCollection();
             IList<string> info = new List<string>();
-            Console.WriteLine("Enter in the path to your Docx Folder. Make sure to escape with '\\\'.");
+            Console.WriteLine(@"Enter in the path to your Docx Folder. Make sure to escape with '\\'.");
             string folderPath = Console.ReadLine();
-            Console.WriteLine("Enter in the path to your text file. Make sure to escape with '\\\'.");
+            Console.WriteLine(@"Enter in the path to your text file. Make sure to escape with '\\'.");
             string textFilePath = Console.ReadLine();
 
             try
@@ -47,17 +47,14 @@ namespace DocxParser
                 {
                     try
                     {
-                        var reportAndApproverInfo = GetReportAndApproverInfo(filePath);
-
-                        info.Add(reportAndApproverInfo);
-                        
+                        info.Add(GetReportAndApproverInfo(filePath));
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.ToString());
                     }
-
                 }
+
                 System.IO.File.WriteAllLines(textFilePath, info);
 
                 Console.WriteLine("{0} files written to {1}", (numberOfNonApprovals + numberOfApprovals).ToString(), textFilePath);
@@ -83,6 +80,7 @@ namespace DocxParser
             {
                 sc.Add(fileName);
             }
+
             return sc;
         }
 
@@ -134,7 +132,6 @@ namespace DocxParser
                     textBuilder.Append(approver.NextSibling.InnerText);
                     textBuilder.Append(Environment.NewLine);
                     numberOfApprovals++;
-                    
                 }
 
                 else
@@ -146,6 +143,7 @@ namespace DocxParser
 
                 wdDoc.Close();
             }
+
             return textBuilder.ToString();
         }
     }
