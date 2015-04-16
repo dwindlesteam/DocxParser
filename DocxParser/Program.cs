@@ -23,14 +23,13 @@ namespace DocxParser
             }
             catch (Exception e)
             {
-
                 Console.WriteLine(e.ToString());
             }
 
 
             if (!(filePaths.Count > 0))
             {
-                Console.WriteLine("No files found in DocxFolder.");
+                Console.WriteLine("No files found in {0}.", folderPath);
                 Console.ReadLine();
             }
 
@@ -62,9 +61,8 @@ namespace DocxParser
         {
             StringCollection sc = new StringCollection();
 
-            // string[] files = Directory.GetFiles(folderPath);
             var files = Directory.GetFiles(folderPath, "*.docx", SearchOption.AllDirectories);
-     
+
             foreach (string fileName in files)
             {
                 sc.Add(fileName);
@@ -93,23 +91,40 @@ namespace DocxParser
 
                 XmlNodeList paragraphNodes = xdoc.SelectNodes("//w:tc", nsManager);
 
-                foreach (XmlNode textNode in paragraphNodes)
-                {
-                    if (textNode.InnerText.Contains("Report Name"))
-                    {
-                        textBuilder.Append(textNode.InnerText);
-                        textBuilder.Append(textNode.NextSibling.InnerText);
-                        textBuilder.Append(Environment.NewLine);
-                    }
+                var reportName = paragraphNodes.Cast<XmlNode>()
+                                               .Where(x => x.InnerText.Contains("Report Name"))
+                                               .FirstOrDefault();
 
-                    if (textNode.InnerText.Contains("Approved By"))
-                    {
-                        textBuilder.Append(textNode.InnerText);
-                        textBuilder.Append(textNode.NextSibling.InnerText);
-                        textBuilder.Append(Environment.NewLine);
-                        break;
-                    }
+                if (reportName != null)
+                {
+                    textBuilder.Append(reportName.InnerText);
+                    textBuilder.Append(reportName.NextSibling.InnerText);
+                    textBuilder.Append(Environment.NewLine);
                 }
+
+                else
+                {
+                    textBuilder.Append("No Report Name");
+                    textBuilder.Append(Environment.NewLine);
+                }
+
+                var approver = paragraphNodes.Cast<XmlNode>()
+                                             .Where(x => x.InnerText.Contains("Approved By"))
+                                             .FirstOrDefault();
+
+                if (approver != null)
+                {
+                    textBuilder.Append(approver.InnerText);
+                    textBuilder.Append(approver.NextSibling.InnerText);
+                    textBuilder.Append(Environment.NewLine);
+                }
+
+                else
+                {
+                    textBuilder.Append("No Approver");
+                    textBuilder.Append(Environment.NewLine);
+                }
+
                 wdDoc.Close();
             }
             return textBuilder.ToString();
