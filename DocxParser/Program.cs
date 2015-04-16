@@ -1,36 +1,34 @@
-﻿using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocxParser.Helper;
+using DocxParser.Parser;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 
 namespace DocxParser
 {
     class Program
     {
-        static int numberOfApprovals = 0;
-        static int numberOfNonApprovals = 0;
-
         static void Main(string[] args)
         {
-            StringCollection filePaths = new StringCollection();
-            IList<string> info = new List<string>();
-            Console.WriteLine(@"Enter in the path to your Docx Folder. Make sure to escape with '\\'.");
+            OpenXMLParser parser = new OpenXMLParser();
+            DirectoryOperator directoryOperator = new DirectoryOperator();
+
+            IList<string> filePaths = new List<string>();
+            IList<string> reportNameAndApprovalList = new List<string>();
+
+            Console.WriteLine(@"Enter the path to your Docx Folder. Make sure to escape with '\\'.");
+            Console.WriteLine(@"Example: C:\\Users\\foo\\Desktop\\DocxFolder");
             string folderPath = Console.ReadLine();
-            Console.WriteLine(@"Enter in the path to your text file + textfile name. Make sure to escape with '\\'.");
+            Console.WriteLine(@"Enter the path to your text file + textfile name. Make sure to escape with '\\'.");
             string textFilePath = Console.ReadLine();
 
             try
             {
-                filePaths = GetListOfPaths(folderPath.ToString());
+                filePaths = directoryOperator.GetListOfAllPaths(folderPath.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.InnerException.ToString());
+                Console.WriteLine(e.Message);
             }
 
             if (!(filePaths.Count > 0))
@@ -46,111 +44,29 @@ namespace DocxParser
                 {
                     try
                     {
-                        info.Add(GetReportAndApproverInfo(filePath));
+                        reportNameAndApprovalList.Add(parser.GetReportAndApproverInfo(filePath));
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.InnerException.ToString());
+                        Console.WriteLine(e.Message);
                     }
                 }
 
                 try
                 {
-                    System.IO.File.WriteAllLines(textFilePath, info);
+                    System.IO.File.WriteAllLines(textFilePath, reportNameAndApprovalList);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.InnerException.ToString());
+                    Console.WriteLine(e.Message);
                 }
             
-                Console.WriteLine("{0} files written to {1}", (numberOfNonApprovals + numberOfApprovals).ToString(), textFilePath);
-                Console.WriteLine("# of Approvals: {0}", numberOfApprovals.ToString());
-                Console.WriteLine("# of NonApprovals: {0}", numberOfNonApprovals.ToString());
+                Console.WriteLine("{0} files written to {1}", (parser.CountOfApprovals + parser.CountOfNonApprovals).ToString(), textFilePath);
+                Console.WriteLine("# of Approvals: {0}", parser.CountOfApprovals.ToString());
+                Console.WriteLine("# of NonApprovals: {0}", parser.CountOfNonApprovals.ToString());
                 Console.WriteLine("Done.");
                 Console.ReadLine();
             }
-        }
-
-        /// <summary>
-        /// Scans Docx folder for files and dumps the pathnames into StringCollection object
-        /// </summary>
-        /// <param name="folderPath"></param>
-        /// <returns></returns>
-        public static StringCollection GetListOfPaths(string folderPath)
-        {
-            StringCollection sc = new StringCollection();
-
-            var files = Directory.GetFiles(folderPath, "*.docx", SearchOption.AllDirectories);
-
-            foreach (string fileName in files)
-            {
-                sc.Add(fileName);
-            }
-
-            return sc;
-        }
-
-        /// <summary>
-        /// Parses .docx file and prints out the report name and approver information.
-        /// </summary>
-        /// <param name="Path"></param>
-        /// <returns></returns>
-        public static string GetReportAndApproverInfo(string Path)
-        {
-            const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-            StringBuilder textBuilder = new StringBuilder();
-
-            using (WordprocessingDocument wdDoc = WordprocessingDocument.Open(Path, false))
-            {
-                NameTable nt = new NameTable();
-                XmlNamespaceManager nsManager = new XmlNamespaceManager(nt);
-                nsManager.AddNamespace("w", wordmlNamespace);
-
-                XmlDocument xdoc = new XmlDocument(nt);
-                xdoc.Load(wdDoc.MainDocumentPart.GetStream());
-
-                XmlNodeList paragraphNodes = xdoc.SelectNodes("//w:tc", nsManager);
-
-                var reportName = paragraphNodes.Cast<XmlNode>()
-                                               .Where(x => x.InnerText.Contains("Report Name"))
-                                               .FirstOrDefault();
-
-                if (reportName != null)
-                {
-                    textBuilder.Append(reportName.InnerText);
-                    textBuilder.Append(reportName.NextSibling.InnerText);
-                    textBuilder.Append(Environment.NewLine);
-                }
-
-                else
-                {
-                    textBuilder.Append("No Report Name");
-                    textBuilder.Append(Environment.NewLine);
-                }
-
-                var approver = paragraphNodes.Cast<XmlNode>()
-                                             .Where(x => x.InnerText.Contains("Approved By"))
-                                             .FirstOrDefault();
-
-                if (approver != null)
-                {
-                    textBuilder.Append(approver.InnerText);
-                    textBuilder.Append(approver.NextSibling.InnerText);
-                    textBuilder.Append(Environment.NewLine);
-                    numberOfApprovals++;
-                }
-
-                else
-                {
-                    textBuilder.Append("No Approver");
-                    textBuilder.Append(Environment.NewLine);
-                    numberOfNonApprovals++;
-                }
-
-                wdDoc.Close();
-            }
-
-            return textBuilder.ToString();
         }
     }
 }
