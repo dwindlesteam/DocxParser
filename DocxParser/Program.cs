@@ -21,7 +21,7 @@ namespace DocxParser
             IList<string> info = new List<string>();
             Console.WriteLine(@"Enter in the path to your Docx Folder. Make sure to escape with '\\'.");
             string folderPath = Console.ReadLine();
-            Console.WriteLine(@"Enter in the path to your text file. Make sure to escape with '\\'.");
+            Console.WriteLine(@"Enter in the path to your text file + textfile name. Make sure to escape with '\\'.");
             string textFilePath = Console.ReadLine();
 
             try
@@ -30,9 +30,8 @@ namespace DocxParser
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(e.InnerException.ToString());
             }
-
 
             if (!(filePaths.Count > 0))
             {
@@ -51,12 +50,19 @@ namespace DocxParser
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.ToString());
+                        Console.WriteLine(e.InnerException.ToString());
                     }
                 }
 
-                System.IO.File.WriteAllLines(textFilePath, info);
-
+                try
+                {
+                    System.IO.File.WriteAllLines(textFilePath, info);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.InnerException.ToString());
+                }
+            
                 Console.WriteLine("{0} files written to {1}", (numberOfNonApprovals + numberOfApprovals).ToString(), textFilePath);
                 Console.WriteLine("# of Approvals: {0}", numberOfApprovals.ToString());
                 Console.WriteLine("# of NonApprovals: {0}", numberOfNonApprovals.ToString());
