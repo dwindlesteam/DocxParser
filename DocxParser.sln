@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocxParser.UI", "DocxParser\DocxParser.UI.csproj", "{4580C0D5-0BF3-4DC8-A75B-0948DD668D6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocxParser.UI", "DocxParser.UI\DocxParser.UI.csproj", "{4580C0D5-0BF3-4DC8-A75B-0948DD668D6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocxParser.Parser", "DocxParser.Parser\DocxParser.Parser.csproj", "{FBF3994E-8A5D-4D1E-BEDE-AA0964AFDC64}"
 EndProject
